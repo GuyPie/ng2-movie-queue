@@ -1,27 +1,45 @@
-import {Component, View, bootstrap, NgFor, NgModel} from 'angular2/angular2';
+import {Component, View, bootstrap, NgFor} from 'angular2/angular2';
 
 @Component({
   selector: 'my-app'
 })
 @View({
-  directives: [NgFor],
-  template: `<input placeholder="New movie" [ng-model]="currName">
-    <button (click)="addMovie($event)"></button>`
+   template: `
+    <ul>
+      <li *ng-for="#movie of movies; #i = index">
+        {{ movie }}
+        <button (click)="removeMovie(i)">Remove Movie</button>
+      </li>
+    </ul>
+    <input #currname (keyup)="doneTyping($event)">
+    <button (click)="addMovie(currname.value)">Add Movie</button>
+          `,
+  directives: [NgFor]
 })
-// Component controller
-class Movies {
+class TodoList {
   movies: Array<string>;
-  currName: string;
   
-   constructor() {
-     this.movies = [];
-   }
-  
-  addMovie(event) {
-    this.movies.push(this.currName);
-    console.log(this.movies);
+  constructor() {
+    this.movies = JSON.parse(localStorage['movies']) || [];
   }
-};
+  
+  addMovie(movie: string) {
+    this.movies.push(movie);
+    localStorage['movies'] = JSON.stringify(this.movies);
+  }
+  
+  removeMovie(i: number) {
+    this.movies.splice(i, 1);
+    localStorage['movies'] = JSON.stringify(this.movies);
+  }
+  
+  doneTyping($event) {
+    if($event.which === 13) {
+      this.addMovie($event.target.value);
+      $event.target.value = null;
+    }
+  }
+}
 
 
-bootstrap(Movies);
+bootstrap(TodoList);
